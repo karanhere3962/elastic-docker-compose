@@ -132,5 +132,7 @@ es01/
 es02/
 enterprisesearch/
 certs/
+logstash/
+configs/logstash-configs/
 
 .env.*
