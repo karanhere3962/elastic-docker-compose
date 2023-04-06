@@ -132,3 +132,5 @@ es01/
 es02/
 enterprisesearch/
 certs/
+
+.env.*

@@ -63,7 +63,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-      - esdata01:/usr/share/elasticsearch/data
+      - ./es01/:/usr/share/elasticsearch/data
     ports:
       - ${ES_PORT}:9200
     environment:
@@ -105,7 +105,7 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
     volumes:
       - certs:/usr/share/elasticsearch/config/certs
-      - esdata02:/usr/share/elasticsearch/data
+      - ./es02:/usr/share/elasticsearch/data
     environment:
       - node.name=es02
       - cluster.name=${CLUSTER_NAME}
@@ -137,40 +137,6 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
-      
-  enterprisesearch:
-    depends_on:
-      es01:
-        condition: service_healthy
-      kibana:
-        condition: service_healthy
-    image: docker.elastic.co/enterprise-search/enterprise-search:${STACK_VERSION}
-    volumes:
-      - certs:/usr/share/enterprise-search/config/certs
-      - enterprisesearchdata:/usr/share/enterprise-search/config
-    ports:
-      - ${ENTERPRISE_SEARCH_PORT}:3002
-    environment:
-      - SERVERNAME=enterprisesearch
-      - secret_management.encryption_keys=[${ENCRYPTION_KEYS}]
-      - allow_es_settings_modification=true
-      - elasticsearch.host=https://es01:9200
-      - elasticsearch.username=elastic
-      - elasticsearch.password=${ELASTIC_PASSWORD}
-      - elasticsearch.ssl.enabled=true
-      - elasticsearch.ssl.certificate_authority=/usr/share/enterprise-search/config/certs/ca/ca.crt
-      - kibana.external_url=http://kibana:5601
-      - ENTERPRISESEARCH_HOST=http://enterprisesearch:${ENTERPRISE_SEARCH_PORT}
-    mem_limit: ${MEM_LIMIT}
-    healthcheck:
-      test:
-        [
-            "CMD-SHELL",
-            "curl -s -I http://localhost:3002 | grep -q 'HTTP/1.1 302 Found'",
-        ]
-      interval: 10s
-      timeout: 10s
-      retries: 120
 
   kibana:
     depends_on:
@@ -181,7 +147,7 @@ services:
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     volumes:
       - certs:/usr/share/kibana/config/certs
-      - kibanadata:/usr/share/kibana/data
+      - ./kibana:/usr/share/kibana/data
     ports:
       - ${KIBANA_PORT}:5601
     environment:
@@ -202,52 +168,8 @@ services:
       interval: 10s
       timeout: 10s
       retries: 120
-  
-  apm-server:
-    image: docker.elastic.co/apm/apm-server:${STACK_VERSION}
-    ports:
-      - ${APMSERVER_PORT}:8200
-    depends_on:
-      es01:
-        condition: service_healthy
-    command: >
-      apm-server -e
-        -E apm-server.rum.enabled=true
-        -E setup.template.settings.index.number_of_replicas=0
-    volumes:
-      - ./apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
-    healthcheck:
-      interval: 5s
-      retries: 12
-      test: 
-        [
-          "CMD-SHELL",
-          "curl --location --request GET 'http://localhost:8200' --header 'Authorization:Bearer 32fdcd3d013d09da34797938a24823b25d681559535c61374abd' | grep -q '\"publish_ready\": true'",
-        ]
 
 volumes:
   certs:
-    driver_opts:
-      type: none
-      device: ./certs
-      o: bind
-  esdata01:
-    driver_opts:
-      type: none
-      device: ./es01
-      o: bind
-  esdata02:
-    driver_opts:
-      type: none
-      device: ./es02
-      o: bind
-  enterprisesearchdata:
-    driver_opts:
-      type: none
-      device: ./enterprisesearch
-      o: bind
-  kibanadata:
-    driver_opts:
-      type: none
-      device: ./kibana
-      o: bind
+    driver: local
+    name: es_certs

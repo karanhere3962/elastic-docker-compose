@@ -1,0 +1,40 @@
+version: "2.2"
+
+services:
+  apm-server:
+    image: docker.elastic.co/apm/apm-server:${STACK_VERSION}
+    ports:
+      - ${APMSERVER_PORT}:8200
+    cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
+    cap_drop: ["ALL"]
+    command: >
+       apm-server -e
+         -E apm-server.rum.enabled=true
+         -E setup.kibana.host=kibana:5601
+         -E setup.template.settings.index.number_of_replicas=0
+         -E apm-server.kibana.enabled=true
+         -E apm-server.kibana.host=kibana:5601
+         -E output.elasticsearch.hosts=["https://es01:9200"]
+    
+    volumes:
+      - ./configs/apm-server.yml:/usr/share/apm-server/apm-server.yml:ro
+      - certs:/usr/share/apm-server/certs/
+
+    environment:
+      - APMSERVER_HOST=${APMSERVER_HOST}
+      - APMSERVER_SECRET_TOKEN=${APMSERVER_SECRET_TOKEN}
+      - APMSERVER_OUTOUT_ELASTICSEARCH=${APMSERVER_OUTOUT_ELASTICSEARCH}
+      - APMSERVER_OUTOUT_ELASTICSEARCH_PROTOCOL=${APMSERVER_OUTOUT_ELASTICSEARCH_PROTOCOL}
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTIC_USERNAME=elastic
+    healthcheck:
+      interval: 10s
+      retries: 12
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
+  
+volumes:
+  certs:
+    driver: local
+    external: true
+    name: es_certs
+
