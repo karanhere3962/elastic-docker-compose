@@ -1,0 +1,31 @@
+version: "2.2"
+
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
+    # build:
+    #   context: ./logstash
+    #   args: 
+    #     STACK_VERSION: ${STACK_VERSION}
+    volumes: 
+      - certs:/home/es_certs/:rw
+      - ./configs/logstash-configs/:/usr/share/logstash/pipeline/
+      - ./configs/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./logstash/:/home/logstash/
+    # command: bash -c "bin/logstash-plugin install logstash-filter-metricize && bin/logstash-plugin install logstash-filter-geoip && bin/logstash-plugin install logstash-codec-multiline && /usr/local/bin/docker-entrypoint"
+    environment:
+      - LS_NODE_NAME=${LOGSTASH_NODE_NAME}
+      - LOGSTASH_SSL=true
+      - LOGSTASH_CERT_VERIFICATION=false
+      - LOGSTASH_CA_CERT=/home/es_certs/ca/ca.crt
+      - LOGSTASH_ES_HOST=${LOGSTASH_ES_HOST}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+    ports:
+      - ${LOGSTASH_PORT}:9600
+    
+volumes:
+  certs:
+    driver: local
+    external: true
+    name: es_certs
+    

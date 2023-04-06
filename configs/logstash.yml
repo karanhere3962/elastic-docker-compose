@@ -4,5 +4,5 @@ pipeline:
     delay: ${BATCH_DELAY:50}
 node:
   name: "node_${LS_NODE_NAME}"
-path:
-   queue: "/home/logstash"
+# path:
+#    queue: "/home/logstash"
