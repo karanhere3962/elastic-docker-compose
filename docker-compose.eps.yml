@@ -30,7 +30,6 @@ services:
 
 volumes:
   certs:
-    driver: local
     external: true
     name: es_certs
   enterprisesearchdata:
