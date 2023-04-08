@@ -132,6 +132,7 @@ es01/
 es02/
 enterprisesearch/
 certs/
+es_certs/
 logstash/
 configs/logstash-configs/
 
