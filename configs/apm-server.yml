@@ -378,14 +378,14 @@ output.elasticsearch:
   # after very careful consideration. It is primarily intended as a temporary
   # diagnostic mechanism when attempting to resolve TLS errors; its use in
   # production environments is strongly discouraged.
-  ssl.verification_mode: none
+  ssl.verification_mode: certificate
 
   # List of supported/valid TLS versions. By default all TLS versions 1.0 up to
   # 1.2 are enabled.
   # ssl.supported_protocols: [TLSv1.0, TLSv1.1, TLSv1.2]
 
   # List of root certificates for HTTPS server verifications.
-  # ssl.certificate_authorities: ["${HOME_PATH}/es_certs/ca/ca.crt"]
+  ssl.certificate_authorities: ["/usr/share/apm-server/certs/ca/ca.crt"]
 
   # Certificate for SSL client authentication.
   # ssl.certificate: "${HOME_PATH}/es_certs/ca/ca.crt"
