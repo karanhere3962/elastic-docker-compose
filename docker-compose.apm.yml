@@ -7,6 +7,7 @@ services:
       - ${APMSERVER_PORT}:8200
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
+    user: root
     command: >
        apm-server -e
          -E apm-server.rum.enabled=true
